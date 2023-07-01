@@ -1,0 +1,42 @@
+version: "3.5"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: &app app
+    platform: linux/amd64
+    container_name: go-boilerplate-api
+    ports:
+      - "3000:3000"
+    env_file:
+      &envfile
+      - .env
+    volumes:
+      - .:/app
+    environment:
+      - DB_HOST=db
+    command: >
+      sh -c "CompileDaemon --build=\"go build main.go\" --command=./main"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - default
+
+  redis:
+    restart: always
+    platform: linux/amd64
+    image: redis:latest
+    ports:
+      - "6392:6379"
+
+  db:
+    image: postgres:12-alpine
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5440:5432
