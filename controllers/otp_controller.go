@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
@@ -29,7 +28,6 @@ func OTPValidateController(c *gin.Context) {
 	}
 	tokenStruct, err := authservice.GenerateToken(int(user.ID))
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Something went wrong",
 		})

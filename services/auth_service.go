@@ -7,7 +7,13 @@ import (
 	"time"
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
+	"github.com/cosmos-sajal/go_boilerplate/models"
 	"github.com/golang-jwt/jwt"
+)
+
+const (
+	ACCESS_TOKEN_TYPE  = "access"
+	REFRESH_TOKEN_TYPE = "refresh"
 )
 
 type Token struct {
@@ -15,12 +21,55 @@ type Token struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+func getOTPAttempPrefix(mobileNumber string) string {
+	return OTP_ATTEMPTS_PREFIX + mobileNumber
+}
+
+func getTokenExiries() (time.Duration, time.Duration) {
+	accessTokenExpiry, _ := strconv.Atoi(os.Getenv("ACCESS_TOKEN_EXPIRY"))
+	refreshTokenExpiry, _ := strconv.Atoi(os.Getenv("REFRESH_TOKEN_EXPIRY"))
+
+	return time.Duration(accessTokenExpiry), time.Duration(refreshTokenExpiry)
+}
+
+func getClaims(token string) (jwt.MapClaims, error) {
+	secretKey := []byte(os.Getenv("JWT_TOKEN"))
+	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := t.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, err
+	}
+
+	return claims, nil
+}
+
+func GetUserIdFromToken(token string) (int, error) {
+	claims, err := getClaims(token)
+	if err != nil {
+		return 0, err
+	}
+
+	floatUserId := claims["user_id"].(float64)
+	userId := int(floatUserId)
+
+	return userId, nil
+}
+
 func GenerateToken(userId int) (*Token, error) {
 	secretKey := []byte(os.Getenv("JWT_TOKEN"))
+	accessTokenExpiry, refreshTokenExpiry := getTokenExiries()
+
 	// Generating Access Token
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userId,
-		"exp":     time.Now().Add(10 * time.Minute).Unix(),
+		"exp":     time.Now().Add(accessTokenExpiry * time.Second).Unix(),
+		"type":    ACCESS_TOKEN_TYPE,
 	})
 	accessTokenString, err := accessToken.SignedString(secretKey)
 	if err != nil {
@@ -30,8 +79,8 @@ func GenerateToken(userId int) (*Token, error) {
 	// Generating Refresh TOken
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userId,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-		"sub":     1,
+		"exp":     time.Now().Add(refreshTokenExpiry * time.Second).Unix(),
+		"type":    REFRESH_TOKEN_TYPE,
 	})
 	refreshTokenString, err := refreshToken.SignedString(secretKey)
 	if err != nil {
@@ -44,8 +93,36 @@ func GenerateToken(userId int) (*Token, error) {
 	}, err
 }
 
+func IsValidToken(token string, tokenType string) bool {
+	claims, err := getClaims(token)
+	if err != nil {
+		return false
+	}
+
+	// checking expiry
+	expiry := claims["exp"].(float64)
+	expiryTime := time.Unix(int64(expiry), 0)
+	currentTime := time.Now()
+	if expiryTime.Before(currentTime) {
+		return false
+	}
+
+	// check if user exists
+	floatUserId := claims["user_id"].(float64)
+	userId := int(floatUserId)
+	_, err = models.GetUser(userId)
+	if err != nil {
+		return false
+	}
+
+	// check token type
+	tokenTypeFromToken := claims["type"].(string)
+
+	return tokenTypeFromToken == tokenType
+}
+
 func IsRateLimitExceeded(mobileNumber string) bool {
-	key := "OTP_ATTEMPTS_" + mobileNumber
+	key := getOTPAttempPrefix(mobileNumber)
 	val, err := helpers.GetCacheValue(key)
 	if err != nil {
 		return false
@@ -57,14 +134,14 @@ func IsRateLimitExceeded(mobileNumber string) bool {
 }
 
 func IncrementOTPAttemptCounter(mobileNumber string) {
-	key := "OTP_ATTEMPTS_" + mobileNumber
+	key := getOTPAttempPrefix(mobileNumber)
 	val, err := helpers.GetCacheValue(key)
 	if err != nil {
-		helpers.SetCacheValue(key, "1", 3600)
+		helpers.SetCacheValue(key, "1", OTP_ATTEMPT_KEY_EXPIRY)
 		return
 	}
 	num, _ := strconv.Atoi(val)
 	num++
 	fmt.Println(key, num, val)
-	helpers.SetCacheValue(key, strconv.Itoa(num), 3600)
+	helpers.SetCacheValue(key, strconv.Itoa(num), OTP_ATTEMPT_KEY_EXPIRY)
 }

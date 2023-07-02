@@ -20,5 +20,6 @@ func main() {
 	r.POST("/api/v1/user/signin/", controllers.SignInController)
 
 	r.POST("/api/v1/otp/validate/", controllers.OTPValidateController)
+	r.POST("/api/v1/token/refresh/", controllers.RefreshTokenController)
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
