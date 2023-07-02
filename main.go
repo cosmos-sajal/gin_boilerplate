@@ -15,5 +15,6 @@ func main() {
 	r := gin.Default()
 	r.POST("/api/v1/user/", controllers.CreateUser)
 	r.GET("/api/v1/user/", controllers.GetUserList)
+	r.PATCH("/api/v1/user/:user_id/", controllers.UpdateUser)
 	r.Run() // listen and serve on 0.0.0.0:8080
 }

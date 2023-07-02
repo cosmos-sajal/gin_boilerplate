@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"log"
+	"net/http"
+	"strconv"
 
 	"github.com/cosmos-sajal/go_boilerplate/models"
 	"github.com/cosmos-sajal/go_boilerplate/validators"
@@ -23,10 +25,10 @@ func CreateUser(c *gin.Context) {
 	user, err := models.CreateUser(
 		*requestBody.Name, *requestBody.MobileNumber, *requestBody.Dob)
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	c.JSON(200, user)
+	c.JSON(http.StatusCreated, user)
 }
 
 func GetUserList(c *gin.Context) {
@@ -44,8 +46,32 @@ func GetUserList(c *gin.Context) {
 
 	userList, err := models.GetUserList(*queryParams.Limit, *queryParams.Offset)
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	c.JSON(200, userList)
+	c.JSON(http.StatusOK, userList)
+}
+
+func UpdateUser(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Param("user_id"))
+	var requestBody validators.UpdateUser
+	c.Bind(&requestBody)
+	validationErr := requestBody.Validate(userId)
+	if validationErr != nil {
+		c.JSON(validationErr.Status, validationErr)
+		return
+	}
+
+	userStruct := models.UpdateUserStruct{
+		Name:         requestBody.Name,
+		MobileNumber: requestBody.MobileNumber,
+		DOB:          requestBody.Dob,
+		IsDeleted:    requestBody.IsDeleted,
+	}
+	user, err := models.UpdateUser(userId, &userStruct)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	c.JSON(http.StatusOK, user)
 }

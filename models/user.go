@@ -25,6 +25,28 @@ type UserResponse struct {
 	MobileNumber string    `json:"mobile_number"`
 }
 
+type UserList struct {
+	Users []UserResponse `json:"users"`
+	Count int64          `json:"count"`
+}
+
+type UpdateUserStruct struct {
+	Name         *string
+	MobileNumber *string
+	DOB          *string
+	IsDeleted    *bool
+}
+
+func getUserResponse(user User) *UserResponse {
+	return &UserResponse{
+		ID:           user.ID,
+		Name:         user.Name,
+		UUID:         user.UUID,
+		DOB:          user.DOB,
+		MobileNumber: user.MobileNumber,
+	}
+}
+
 func CreateUser(name string, mobileNumber string, dob string) (*UserResponse, error) {
 	datetimeDob, err := helpers.ConvertStringToDatetime(dob)
 	if err != nil {
@@ -42,18 +64,17 @@ func CreateUser(name string, mobileNumber string, dob string) (*UserResponse, er
 		return nil, result.Error
 	}
 
-	return &UserResponse{
-		ID:           user.ID,
-		Name:         user.Name,
-		MobileNumber: user.MobileNumber,
-		UUID:         user.UUID,
-		DOB:          user.DOB,
-	}, nil
+	return getUserResponse(*user), nil
 }
 
-type UserList struct {
-	Users []UserResponse `json:"users"`
-	Count int64          `json:"count"`
+func GetUser(userId int) (*User, error) {
+	var user User
+	result := initializers.DB.Model(&User{}).Where("id = ? and deleted_at is null", userId).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
 }
 
 func GetUserList(limit int, offset int) (*UserList, error) {
@@ -75,9 +96,46 @@ func GetUserList(limit int, offset int) (*UserList, error) {
 	}, nil
 }
 
+func UpdateUser(userId int, userStruct *UpdateUserStruct) (*UserResponse, error) {
+	user, err := GetUser(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if userStruct.Name != nil {
+		user.Name = *userStruct.Name
+	}
+	if userStruct.MobileNumber != nil {
+		user.MobileNumber = *userStruct.MobileNumber
+	}
+	if userStruct.DOB != nil {
+		datetimeDob, err := helpers.ConvertStringToDatetime(*userStruct.DOB)
+		if err != nil {
+			return nil, err
+		}
+		user.DOB = datetimeDob
+	}
+	if userStruct.IsDeleted != nil {
+		user.DeletedAt = gorm.DeletedAt{
+			Time:  time.Now(),
+			Valid: true,
+		}
+	}
+	initializers.DB.Save(&user)
+
+	return getUserResponse(*user), nil
+}
+
 func IsNumberPresent(MobileNumber string) bool {
 	result := initializers.DB.Where(
 		"mobile_number = ? and deleted_at is null", MobileNumber).First(&User{})
+
+	return result.RowsAffected > 0
+}
+
+func IsUserPresent(userId int) bool {
+	result := initializers.DB.Where(
+		"id = ? and deleted_at is null", userId).First(&User{})
 
 	return result.RowsAffected > 0
 }

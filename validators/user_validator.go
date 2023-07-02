@@ -1,7 +1,7 @@
 package validators
 
 import (
-	"fmt"
+	"net/http"
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
@@ -84,7 +84,6 @@ func (u *GetUserList) Validate() *RestError {
 	} else if u.Limit == nil {
 		u.Limit = new(int)
 		*u.Limit = 10
-		fmt.Println("idhar aaya")
 	}
 
 	if u.Offset != nil && *u.Offset < 0 {
@@ -95,7 +94,70 @@ func (u *GetUserList) Validate() *RestError {
 	} else if u.Offset == nil {
 		u.Offset = new(int)
 		*u.Offset = 0
-		fmt.Println("idhar aaya 2")
+	}
+
+	if len(errors) > 0 {
+		return &RestError{
+			Status: 400,
+			Errors: errors,
+		}
+	}
+
+	return nil
+}
+
+type UpdateUser struct {
+	Name         *string `json:"name"`
+	MobileNumber *string `json:"mobile_number"`
+	Dob          *string `json:"dob"`
+	IsDeleted    *bool   `json:"is_deleted"`
+}
+
+func (u *UpdateUser) Validate(userId int) *RestError {
+	var errors []Error
+
+	if !models.IsUserPresent(userId) {
+		errors = append(errors, Error{
+			Key:     "user_id",
+			Message: "User not found",
+		})
+		return &RestError{
+			Status: http.StatusNotFound,
+			Errors: errors,
+		}
+	}
+
+	if u.MobileNumber != nil && !helpers.ValidateMobileNumber(*u.MobileNumber) {
+		errors = append(errors, Error{
+			Key:     "mobile_number",
+			Message: "Invalid Mobile Number",
+		})
+	}
+
+	user, err := models.GetUser(userId)
+	if err != nil {
+		errors = append(errors, Error{
+			Key:     "user_id",
+			Message: "User not found",
+		})
+		return &RestError{
+			Status: http.StatusInternalServerError,
+			Errors: errors,
+		}
+	}
+
+	if models.IsNumberPresent(*u.MobileNumber) && user.MobileNumber != *u.MobileNumber {
+		errors = append(errors, Error{
+			Key:     "mobile_number",
+			Message: "Already present",
+		})
+	}
+
+	if u.Dob != nil && !helpers.ValidateDateOfBirth(*u.Dob) {
+		errors = append(errors, Error{
+			Key:     "dob",
+			Message: "Invalid Date Of Birth",
+		})
 	}
 
 	if len(errors) > 0 {
