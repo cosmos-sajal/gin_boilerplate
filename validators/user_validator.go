@@ -1,6 +1,8 @@
 package validators
 
 import (
+	"fmt"
+
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
 )
@@ -54,6 +56,46 @@ func (u *CreateUser) Validate() *RestError {
 			Key:     "dob",
 			Message: "Invalid Date Of Birth",
 		})
+	}
+
+	if len(errors) > 0 {
+		return &RestError{
+			Status: 400,
+			Errors: errors,
+		}
+	}
+
+	return nil
+}
+
+type GetUserList struct {
+	Limit  *int `json:"limit"`
+	Offset *int `json:"offset"`
+}
+
+func (u *GetUserList) Validate() *RestError {
+	var errors []Error
+
+	if u.Limit != nil && *u.Limit < 0 {
+		errors = append(errors, Error{
+			Key:     "limit",
+			Message: "Invalid Limit",
+		})
+	} else if u.Limit == nil {
+		u.Limit = new(int)
+		*u.Limit = 10
+		fmt.Println("idhar aaya")
+	}
+
+	if u.Offset != nil && *u.Offset < 0 {
+		errors = append(errors, Error{
+			Key:     "offset",
+			Message: "Invalid Offset",
+		})
+	} else if u.Offset == nil {
+		u.Offset = new(int)
+		*u.Offset = 0
+		fmt.Println("idhar aaya 2")
 	}
 
 	if len(errors) > 0 {

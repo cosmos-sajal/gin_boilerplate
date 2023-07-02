@@ -11,5 +11,5 @@ func init() {
 
 func main() {
 	db := initializers.ConnectToDB()
-	db.DB.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{})
 }

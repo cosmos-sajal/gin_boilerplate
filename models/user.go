@@ -51,6 +51,30 @@ func CreateUser(name string, mobileNumber string, dob string) (*UserResponse, er
 	}, nil
 }
 
+type UserList struct {
+	Users []UserResponse `json:"users"`
+	Count int64          `json:"count"`
+}
+
+func GetUserList(limit int, offset int) (*UserList, error) {
+	var users []User
+	var resultCount int64
+	var userResponses []UserResponse
+
+	result := initializers.DB.Model(&users).Where(
+		"deleted_at is null").Limit(limit).Offset(offset).Find(&userResponses)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	initializers.DB.Model(&User{}).Where("deleted_at is null").Count(&resultCount)
+
+	return &UserList{
+		Users: userResponses,
+		Count: resultCount,
+	}, nil
+}
+
 func IsNumberPresent(MobileNumber string) bool {
 	result := initializers.DB.Where(
 		"mobile_number = ? and deleted_at is null", MobileNumber).First(&User{})
