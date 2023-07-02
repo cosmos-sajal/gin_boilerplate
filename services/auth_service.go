@@ -133,7 +133,7 @@ func IsRateLimitExceeded(mobileNumber string) bool {
 	num, _ := strconv.Atoi(val)
 	fmt.Println(key, num, val)
 
-	return num > 5
+	return num > OTP_MAX_ATTEMPT
 }
 
 func IncrementOTPAttemptCounter(mobileNumber string) {
