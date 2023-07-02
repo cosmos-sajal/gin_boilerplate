@@ -2,12 +2,15 @@ package authservice
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -144,4 +147,29 @@ func IncrementOTPAttemptCounter(mobileNumber string) {
 	num++
 	fmt.Println(key, num, val)
 	helpers.SetCacheValue(key, strconv.Itoa(num), OTP_ATTEMPT_KEY_EXPIRY)
+}
+
+func JWTAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Get the JWT token from the request headers
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
+			c.Abort()
+			return
+		}
+
+		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
+
+		if !IsValidToken(tokenString, ACCESS_TOKEN_TYPE) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		} else {
+			userId, _ := GetUserIdFromToken(tokenString)
+			c.Set("user_id", userId) // Set the user ID in the context for later use
+			c.Next()
+		}
+	}
+
 }
