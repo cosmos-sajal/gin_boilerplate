@@ -15,7 +15,6 @@ func init() {
 
 func main() {
 	r := gin.Default()
-	// r.Use(authservice.JWTAuthMiddleware())
 
 	r.POST("/api/v1/user/signin/", controllers.SignInController)
 	r.POST("/api/v1/otp/validate/", controllers.OTPValidateController)
@@ -27,5 +26,5 @@ func main() {
 	authGroup.GET("/api/v1/user/", controllers.GetUserList)
 	authGroup.PATCH("/api/v1/user/:user_id/", controllers.UpdateUser)
 
-	r.Run() // listen and serve on 0.0.0.0:8080
+	r.Run() // listen and serve on 0.0.0.0:3000
 }
