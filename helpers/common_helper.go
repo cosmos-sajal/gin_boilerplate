@@ -1,9 +1,19 @@
 package helpers
 
 import (
+	"math/rand"
 	"regexp"
 	"time"
 )
+
+func generateRandomString(characters string, length int) string {
+	randomString := make([]byte, length)
+	for i := 0; i < length; i++ {
+		randomString[i] = characters[rand.Intn(len(characters))]
+	}
+
+	return string(randomString)
+}
 
 func ValidateMobileNumber(number string) bool {
 	// Define a regular expression pattern for a mobile number
@@ -30,4 +40,11 @@ func ValidateDateOfBirth(dateString string) bool {
 	now := time.Now()
 
 	return date.Before(now)
+}
+
+func GenerateRandomOTP() string {
+	characters := "0123456789"
+	otp := generateRandomString(characters, 4)
+
+	return otp
 }

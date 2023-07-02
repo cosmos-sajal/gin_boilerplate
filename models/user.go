@@ -77,6 +77,16 @@ func GetUser(userId int) (*User, error) {
 	return &user, nil
 }
 
+func GetUserByMobile(mobileNumber string) (*User, error) {
+	var user User
+	result := initializers.DB.Model(&User{}).Where("mobile_number = ? and deleted_at is null", mobileNumber).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &user, nil
+}
+
 func GetUserList(limit int, offset int) (*UserList, error) {
 	var users []User
 	var resultCount int64
