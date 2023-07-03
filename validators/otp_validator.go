@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
-	authservice "github.com/cosmos-sajal/go_boilerplate/services"
+	otpservice "github.com/cosmos-sajal/go_boilerplate/services/otp"
 )
 
 type OTPValidatorStruct struct {
@@ -16,7 +16,7 @@ type OTPValidatorStruct struct {
 func (s *OTPValidatorStruct) Validate() *RestError {
 	var errors []Error
 
-	authservice.IncrementOTPAttemptCounter(*s.MobileNumber)
+	otpservice.IncrementOTPAttemptCounter(*s.MobileNumber)
 	if s.MobileNumber == nil {
 		errors = append(errors, Error{
 			Key:     "mobile_number",
@@ -59,7 +59,7 @@ func (s *OTPValidatorStruct) Validate() *RestError {
 		}
 	}
 
-	if authservice.IsRateLimitExceeded(*s.MobileNumber) {
+	if otpservice.IsRateLimitExceeded(*s.MobileNumber) {
 		return &RestError{
 			Status: http.StatusTooManyRequests,
 			Errors: []Error{{

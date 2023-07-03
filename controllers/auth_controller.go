@@ -6,7 +6,8 @@ import (
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
-	authservice "github.com/cosmos-sajal/go_boilerplate/services"
+	authservice "github.com/cosmos-sajal/go_boilerplate/services/auth"
+	otpservice "github.com/cosmos-sajal/go_boilerplate/services/otp"
 	"github.com/cosmos-sajal/go_boilerplate/validators"
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +23,7 @@ func SignInController(c *gin.Context) {
 	}
 
 	user, _ := models.GetUserByMobile(*requestBody.MobileNumber)
-	cacheKey := authservice.OTP_KEY_PREFIX + user.MobileNumber
+	cacheKey := otpservice.OTP_KEY_PREFIX + user.MobileNumber
 	val, _ := helpers.GetCacheValue(cacheKey)
 	if val == "" {
 		randomOTP = helpers.GenerateRandomOTP()

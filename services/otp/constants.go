@@ -1,4 +1,4 @@
-package authservice
+package otpservice
 
 const (
 	OTP_KEY_PREFIX         = "OTP_KEY_"

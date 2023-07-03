@@ -1,14 +1,12 @@
 package authservice
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -22,10 +20,6 @@ const (
 type Token struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
-}
-
-func getOTPAttempPrefix(mobileNumber string) string {
-	return OTP_ATTEMPTS_PREFIX + mobileNumber
 }
 
 func getTokenExiries() (time.Duration, time.Duration) {
@@ -122,31 +116,6 @@ func IsValidToken(token string, tokenType string) bool {
 	tokenTypeFromToken := claims["type"].(string)
 
 	return tokenTypeFromToken == tokenType
-}
-
-func IsRateLimitExceeded(mobileNumber string) bool {
-	key := getOTPAttempPrefix(mobileNumber)
-	val, err := helpers.GetCacheValue(key)
-	if err != nil {
-		return false
-	}
-	num, _ := strconv.Atoi(val)
-	fmt.Println(key, num, val)
-
-	return num > OTP_MAX_ATTEMPT
-}
-
-func IncrementOTPAttemptCounter(mobileNumber string) {
-	key := getOTPAttempPrefix(mobileNumber)
-	val, err := helpers.GetCacheValue(key)
-	if err != nil {
-		helpers.SetCacheValue(key, "1", OTP_ATTEMPT_KEY_EXPIRY)
-		return
-	}
-	num, _ := strconv.Atoi(val)
-	num++
-	fmt.Println(key, num, val)
-	helpers.SetCacheValue(key, strconv.Itoa(num), OTP_ATTEMPT_KEY_EXPIRY)
 }
 
 func JWTAuthMiddleware() gin.HandlerFunc {

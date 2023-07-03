@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
-	authservice "github.com/cosmos-sajal/go_boilerplate/services"
+	authservice "github.com/cosmos-sajal/go_boilerplate/services/auth"
 	"github.com/cosmos-sajal/go_boilerplate/validators"
 	"github.com/gin-gonic/gin"
 )

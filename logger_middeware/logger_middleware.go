@@ -1,4 +1,4 @@
-package helpers
+package logger
 
 import (
 	"bytes"
@@ -7,8 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
+	authservice "github.com/cosmos-sajal/go_boilerplate/services/auth"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,6 +24,7 @@ type LogData struct {
 	ResponseCode int           `json:"responseCode"`
 	ResponseBody string        `json:"responseBody"`
 	Latency      time.Duration `json:"latency"`
+	UserId       int           `json:"userId"`
 }
 
 type responseWriter struct {
@@ -32,6 +35,22 @@ type responseWriter struct {
 func (w *responseWriter) Write(b []byte) (int, error) {
 	w.body.Write(b)
 	return w.ResponseWriter.Write(b)
+}
+
+func getUserId(c *gin.Context) int {
+	value, exists := c.Request.Header["Authorization"]
+	if !exists {
+		return 0
+	}
+
+	if len(value) == 0 {
+		return 0
+	}
+
+	parts := strings.Split(value[0], "Bearer ")
+	userId, _ := authservice.GetUserIdFromToken(parts[1])
+
+	return userId
 }
 
 func RequestResponseLoggerMiddleware() gin.HandlerFunc {
@@ -69,9 +88,10 @@ func RequestResponseLoggerMiddleware() gin.HandlerFunc {
 			ResponseBody: resBody,
 			ResponseCode: c.Writer.Status(),
 			Latency:      latency,
+			UserId:       getUserId(c),
 		}
 
 		logJSON, _ := json.Marshal(logData)
-		fmt.Printf("Response: %s\n", logJSON)
+		fmt.Printf("%s\n", logJSON)
 	}
 }

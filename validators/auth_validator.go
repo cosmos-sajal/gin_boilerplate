@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cosmos-sajal/go_boilerplate/models"
-	authservice "github.com/cosmos-sajal/go_boilerplate/services"
+	authservice "github.com/cosmos-sajal/go_boilerplate/services/auth"
 )
 
 type SignInStruct struct {
