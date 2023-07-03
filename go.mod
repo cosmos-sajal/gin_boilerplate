@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/schema v1.2.0
 	github.com/joho/godotenv v1.5.1
+	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.2
 )

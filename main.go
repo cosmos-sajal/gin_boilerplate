@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/cosmos-sajal/go_boilerplate/controllers"
+	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/initializers"
 	authservice "github.com/cosmos-sajal/go_boilerplate/services"
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ func init() {
 
 func main() {
 	r := gin.Default()
+	r.Use(helpers.RequestResponseLoggerMiddleware())
 
 	r.POST("/api/v1/user/signin/", controllers.SignInController)
 	r.POST("/api/v1/otp/validate/", controllers.OTPValidateController)
