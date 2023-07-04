@@ -13,6 +13,7 @@ func init() {
 	initializers.ConnectToDB()
 	initializers.ConnectToRedis()
 	go initializers.ConnectToAsyncClient()
+	initializers.InitialiseCron()
 }
 
 func main() {
