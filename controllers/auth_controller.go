@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
+	queueservice "github.com/cosmos-sajal/go_boilerplate/queue_service"
 	authservice "github.com/cosmos-sajal/go_boilerplate/services/auth"
 	otpservice "github.com/cosmos-sajal/go_boilerplate/services/otp"
 	"github.com/cosmos-sajal/go_boilerplate/validators"
@@ -32,9 +32,13 @@ func SignInController(c *gin.Context) {
 		randomOTP = val
 	}
 
-	fmt.Println("OTP is - " + randomOTP)
+	smsSenderStruct := queueservice.SendSMSStruct{
+		OTP:          randomOTP,
+		MobileNumber: user.MobileNumber,
+		UserId:       int(user.ID),
+	}
+	smsSenderStruct.SendMessage()
 
-	// helpers.SendOTP(*requestBody.MobileNumber, randomOTP)
 	c.JSON(http.StatusOK, gin.H{
 		"result": "OTP Sent successfully",
 	})

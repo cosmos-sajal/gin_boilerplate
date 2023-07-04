@@ -12,6 +12,7 @@ func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDB()
 	initializers.ConnectToRedis()
+	go initializers.ConnectToAsyncClient()
 }
 
 func main() {
