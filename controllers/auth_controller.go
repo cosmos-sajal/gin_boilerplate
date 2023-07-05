@@ -5,7 +5,6 @@ import (
 
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/models"
-	queueservice "github.com/cosmos-sajal/go_boilerplate/queue_service"
 	authservice "github.com/cosmos-sajal/go_boilerplate/services/auth"
 	otpservice "github.com/cosmos-sajal/go_boilerplate/services/otp"
 	"github.com/cosmos-sajal/go_boilerplate/validators"
@@ -32,12 +31,7 @@ func SignInController(c *gin.Context) {
 		randomOTP = val
 	}
 
-	smsSenderStruct := queueservice.SendSMSStruct{
-		OTP:          randomOTP,
-		MobileNumber: user.MobileNumber,
-		UserId:       int(user.ID),
-	}
-	smsSenderStruct.SendMessage()
+	otpservice.SendOTP(user.MobileNumber, randomOTP, int(user.ID))
 
 	c.JSON(http.StatusOK, gin.H{
 		"result": "OTP Sent successfully",
