@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
 	"github.com/cosmos-sajal/go_boilerplate/initializers"
 	asyncTasks "github.com/cosmos-sajal/go_boilerplate/tasks"
+	"github.com/cosmos-sajal/go_boilerplate/worker"
 )
 
 func getOTPAttempPrefix(mobileNumber string) string {
@@ -25,15 +26,39 @@ func SendOTP(mobileNumber string, otp string, userId int) {
 	stringifiedMessage, _ := json.Marshal(otpSMSStruct)
 	b64EncodedReq := base64.StdEncoding.EncodeToString([]byte(stringifiedMessage))
 	task := tasks.Signature{
-		Name: "send_otp",
+		Name: worker.SEND_OTP_QUEUE,
 		Args: []tasks.Arg{
 			{
 				Type:  "string",
 				Value: b64EncodedReq,
 			},
 		},
+		RoutingKey: worker.SEND_OTP_QUEUE,
 	}
 	res, err := initializers.TaskServer.SendTask(&task)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(res.GetState())
+
+	emailStruct := asyncTasks.EmailStruct{
+		EmailBody: "Your OTP is " + otp,
+		UserId:    userId,
+	}
+	stringifiedMessage, _ = json.Marshal(emailStruct)
+	b64EncodedReq = base64.StdEncoding.EncodeToString([]byte(stringifiedMessage))
+	task = tasks.Signature{
+		Name: worker.SEND_EMAIL_QUEUE,
+		Args: []tasks.Arg{
+			{
+				Type:  "string",
+				Value: b64EncodedReq,
+			},
+		},
+		RoutingKey: worker.SEND_EMAIL_QUEUE,
+	}
+	res, err = initializers.TaskServer.SendTask(&task)
 	if err != nil {
 		fmt.Println(err)
 		return

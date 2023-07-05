@@ -1,14 +1,22 @@
 package worker
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/RichardKnop/machinery/v1"
 )
 
-func StartWorker(taskserver *machinery.Server) error {
-	worker := taskserver.NewWorker("machinery_worker", 10)
-	if err := worker.Launch(); err != nil {
-		return err
-	}
+var env string = os.Getenv("ENV")
 
-	return nil
+var (
+	SEND_OTP_QUEUE   = fmt.Sprintf("%s-send-otp", env)
+	SEND_EMAIL_QUEUE = fmt.Sprintf("%s-send-email", env)
+)
+
+func StartWorker(taskserver *machinery.Server, queueName string) {
+	worker := taskserver.NewCustomQueueWorker(queueName, 10, queueName)
+	if err := worker.Launch(); err != nil {
+		return
+	}
 }

@@ -41,7 +41,7 @@ services:
     ports:
       - 5440:5432
 
-  worker:
+  worker-send-otp:
     build:
       context: .
       dockerfile: worker.Dockerfile
@@ -51,6 +51,32 @@ services:
     env_file: *envfile
     environment:
       - IS_APP_SERVER=false
+      - QUEUE_NAME=prod-send-otp
+    command:
+      [
+        "go",
+        "run",
+        "main.go"
+      ]
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - db
+    networks:
+      - default
+
+  worker-send-email:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    image: *app
+    platform: linux/amd64
+    restart: always
+    env_file: *envfile
+    environment:
+      - IS_APP_SERVER=false
+      - QUEUE_NAME=prod-send-email
     command:
       [
         "go",

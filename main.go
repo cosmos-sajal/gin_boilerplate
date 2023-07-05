@@ -37,7 +37,7 @@ func main() {
 
 		r.Run() // listen and serve on 0.0.0.0:3000
 	} else {
-		worker.StartWorker(initializers.TaskServer)
+		worker.StartWorker(initializers.TaskServer, os.Getenv("QUEUE_NAME"))
 		initializers.InitialiseCron()
 	}
 }
