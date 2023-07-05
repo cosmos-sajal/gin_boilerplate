@@ -1,13 +1,15 @@
 package otpservice
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 
-	"github.com/cosmos-sajal/go_boilerplate/communication"
+	"github.com/RichardKnop/machinery/v1/tasks"
 	"github.com/cosmos-sajal/go_boilerplate/helpers"
-	queueservice "github.com/cosmos-sajal/go_boilerplate/queue_service"
+	"github.com/cosmos-sajal/go_boilerplate/initializers"
+	asyncTasks "github.com/cosmos-sajal/go_boilerplate/tasks"
 )
 
 func getOTPAttempPrefix(mobileNumber string) string {
@@ -15,24 +17,29 @@ func getOTPAttempPrefix(mobileNumber string) string {
 }
 
 func SendOTP(mobileNumber string, otp string, userId int) {
-	shouldUseQueueingSystem, err :=
-		strconv.ParseBool(os.Getenv("SHOULD_USE_QUEUEING_SYSTEM"))
-	if err != nil || !shouldUseQueueingSystem {
-		otpBodyStruct := &communication.OTPBodyStruct{
-			OTP: otp,
-			To:  mobileNumber,
-		}
-		go otpBodyStruct.SendSMS()
-
-		return
-	}
-
-	smsSenderStruct := queueservice.SendSMSStruct{
+	otpSMSStruct := asyncTasks.OTPSMSStruct{
 		OTP:          otp,
 		MobileNumber: mobileNumber,
 		UserId:       userId,
 	}
-	smsSenderStruct.SendMessage()
+	stringifiedMessage, _ := json.Marshal(otpSMSStruct)
+	b64EncodedReq := base64.StdEncoding.EncodeToString([]byte(stringifiedMessage))
+	task := tasks.Signature{
+		Name: "send_otp",
+		Args: []tasks.Arg{
+			{
+				Type:  "string",
+				Value: b64EncodedReq,
+			},
+		},
+	}
+	res, err := initializers.TaskServer.SendTask(&task)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(res.GetState())
 }
 
 func IsRateLimitExceeded(mobileNumber string) bool {

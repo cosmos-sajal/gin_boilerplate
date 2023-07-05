@@ -2,25 +2,28 @@ package initializers
 
 import (
 	"log"
-	"os"
-	"strconv"
 
-	queueservice "github.com/cosmos-sajal/go_boilerplate/queue_service"
+	"github.com/RichardKnop/machinery/v1"
+	"github.com/RichardKnop/machinery/v1/config"
+	"github.com/cosmos-sajal/go_boilerplate/tasks"
 )
 
+var TaskServer *machinery.Server
+
 func ConnectToAsyncClient() {
-	shouldUseQueueingSystem, err :=
-		strconv.ParseBool(os.Getenv("SHOULD_USE_QUEUEING_SYSTEM"))
-	if err != nil {
-		return
+	var err error
+	var cnf = &config.Config{
+		Broker:        "redis://redis:6379",
+		ResultBackend: "redis://redis:6379",
 	}
-	if !shouldUseQueueingSystem {
-		log.Println("SHOULD_USE_QUEUEING_SYSTEM is false")
+
+	TaskServer, err = machinery.NewServer(cnf)
+	if err != nil {
+		log.Fatal("Error connecting to Redis", err)
 		return
 	}
 
-	_, err = queueservice.ConnectToAsyncClient()
-	if err != nil {
-		log.Fatal("Error connecting to SQS", err)
-	}
+	TaskServer.RegisterTasks(map[string]interface{}{
+		"send_otp": tasks.SendOTP,
+	})
 }

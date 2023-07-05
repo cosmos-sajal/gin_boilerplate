@@ -40,3 +40,27 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - 5440:5432
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    image: *app
+    platform: linux/amd64
+    restart: always
+    env_file: *envfile
+    environment:
+      - IS_APP_SERVER=false
+    command:
+      [
+        "go",
+        "run",
+        "main.go"
+      ]
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - db
+    networks:
+      - default
