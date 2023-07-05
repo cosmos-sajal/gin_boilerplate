@@ -14,6 +14,7 @@ COPY . .
 
 RUN go get github.com/githubnemo/CompileDaemon
 RUN go install github.com/githubnemo/CompileDaemon
+RUN go install github.com/rubenv/sql-migrate/...@latest
 
 EXPOSE 3000
 

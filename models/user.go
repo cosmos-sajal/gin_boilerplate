@@ -13,7 +13,7 @@ type User struct {
 	gorm.Model
 	Name         string
 	DOB          time.Time
-	MobileNumber string
+	MobileNumber string    `gorm:"index:idx_mobile_number"`
 	UUID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();index"`
 }
 
