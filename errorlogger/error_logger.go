@@ -1,4 +1,4 @@
-package errorLogger
+package errorlogger
 
 import (
 	"github.com/getsentry/sentry-go"

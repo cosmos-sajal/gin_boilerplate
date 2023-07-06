@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos-sajal/go_boilerplate/controllers"
 	"github.com/cosmos-sajal/go_boilerplate/initializers"
-	logger "github.com/cosmos-sajal/go_boilerplate/logger_middeware"
+	logger "github.com/cosmos-sajal/go_boilerplate/logger"
 	authservice "github.com/cosmos-sajal/go_boilerplate/services/auth"
 	"github.com/cosmos-sajal/go_boilerplate/worker"
 	sentrygin "github.com/getsentry/sentry-go/gin"
