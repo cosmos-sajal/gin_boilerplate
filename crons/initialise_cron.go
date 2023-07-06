@@ -12,6 +12,7 @@ func Initialise() error {
 
 	// Start the cron scheduler in a Goroutine
 	go c.Start()
+	defer c.Stop()
 
 	return nil
 }

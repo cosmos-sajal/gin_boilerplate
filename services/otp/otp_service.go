@@ -33,32 +33,9 @@ func SendOTP(mobileNumber string, otp string, userId int) {
 				Value: b64EncodedReq,
 			},
 		},
-		RoutingKey: worker.SEND_OTP_QUEUE,
+		// RoutingKey: worker.SEND_OTP_QUEUE,
 	}
 	res, err := initializers.TaskServer.SendTask(&task)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(res.GetState())
-
-	emailStruct := asyncTasks.EmailStruct{
-		EmailBody: "Your OTP is " + otp,
-		UserId:    userId,
-	}
-	stringifiedMessage, _ = json.Marshal(emailStruct)
-	b64EncodedReq = base64.StdEncoding.EncodeToString([]byte(stringifiedMessage))
-	task = tasks.Signature{
-		Name: worker.SEND_EMAIL_QUEUE,
-		Args: []tasks.Arg{
-			{
-				Type:  "string",
-				Value: b64EncodedReq,
-			},
-		},
-		RoutingKey: worker.SEND_EMAIL_QUEUE,
-	}
-	res, err = initializers.TaskServer.SendTask(&task)
 	if err != nil {
 		fmt.Println(err)
 		return

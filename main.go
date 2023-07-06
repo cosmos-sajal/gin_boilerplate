@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
 
 	"github.com/cosmos-sajal/go_boilerplate/controllers"
 	"github.com/cosmos-sajal/go_boilerplate/initializers"
@@ -20,8 +19,8 @@ func init() {
 }
 
 func main() {
-	isAppServer, _ := strconv.ParseBool(os.Getenv("IS_APP_SERVER"))
-	if isAppServer {
+	appType := os.Getenv("APP_TYPE")
+	if appType == "server" {
 		r := gin.Default()
 		r.Use(logger.RequestResponseLoggerMiddleware())
 
@@ -36,8 +35,10 @@ func main() {
 		authGroup.PATCH("/api/v1/user/:user_id/", controllers.UpdateUser)
 
 		r.Run() // listen and serve on 0.0.0.0:3000
-	} else {
+	} else if appType == "worker" {
 		worker.StartWorker(initializers.TaskServer, os.Getenv("QUEUE_NAME"))
+	} else {
 		initializers.InitialiseCron()
+		select {}
 	}
 }

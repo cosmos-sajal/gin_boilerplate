@@ -15,7 +15,14 @@ var (
 )
 
 func StartWorker(taskserver *machinery.Server, queueName string) {
-	worker := taskserver.NewCustomQueueWorker(queueName, 10, queueName)
+	var worker *machinery.Worker
+
+	if env != "prod" {
+		worker = taskserver.NewWorker("machinery_worker", 10)
+	} else {
+		worker = taskserver.NewCustomQueueWorker(queueName, 10, queueName)
+	}
+
 	if err := worker.Launch(); err != nil {
 		return
 	}
