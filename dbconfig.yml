@@ -1,4 +1,4 @@
 development:
   dialect: postgres
-  datasource: host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbname=boilerplate_1 port=5432 sslmode=disable
+  datasource: host=${DB_HOST} user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} port=5432 sslmode=disable
   dir: migrations
