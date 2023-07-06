@@ -8,6 +8,7 @@ import (
 	logger "github.com/cosmos-sajal/go_boilerplate/logger_middeware"
 	authservice "github.com/cosmos-sajal/go_boilerplate/services/auth"
 	"github.com/cosmos-sajal/go_boilerplate/worker"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +17,7 @@ func init() {
 	initializers.ConnectToDB()
 	initializers.ConnectToRedis()
 	initializers.ConnectToAsyncClient()
+	initializers.InitialiseErrorLogger()
 }
 
 func main() {
@@ -23,6 +25,7 @@ func main() {
 	if appType == "server" {
 		r := gin.Default()
 		r.Use(logger.RequestResponseLoggerMiddleware())
+		r.Use(sentrygin.New(sentrygin.Options{}))
 
 		r.POST("/api/v1/user/signin/", controllers.SignInController)
 		r.POST("/api/v1/otp/validate/", controllers.OTPValidateController)
