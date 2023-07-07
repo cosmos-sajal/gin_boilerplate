@@ -180,3 +180,9 @@ curl --location 'localhost:3000/api/v1/token/refresh/' \
 ```
 - Use [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/services/auth/auth_service.go#L49) function to fetch user_id from token.
 - Use [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/main.go#L35) to add JWT middlerware in your API routes to make them secure and private.
+
+### Future Work
+- `Makefile/github workflow` to create builds and push them to dockerhub/AWS ECR.
+- `kubernetes boilerplate` support to deploy the application on prod.
+- module and packaging as per golang standards.
+- `docker-entrypoint.sh` file for securely creating docker images.
