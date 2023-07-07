@@ -132,4 +132,11 @@ SetCacheValue
 helpers.SetCacheValue(key, "1", OTP_ATTEMPT_KEY_EXPIRY)
 ```
 
-
+#### How to use Async programming using Machinery
+- A separate container will start that will kick off [machinery](https://github.com/RichardKnop/machinery)
+- Prod env works with AWS SQS, while dev works with local redis.
+- Create a consumer task as [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/tasks/send_otp.go)
+- Register the task [here](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/initializers/connect_async_queue.go#L65)
+- Trigger the async task like [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/services/otp/otp_service.go#L38)
+- Optionally use [Routing Key](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/services/otp/otp_service.go#L36) - Routing key is recommended in prod so that different tasks go to their respective Queues in the broker.
+- You need to first create these queues in your AWS account.
