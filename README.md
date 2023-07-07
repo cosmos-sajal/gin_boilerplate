@@ -134,9 +134,17 @@ helpers.SetCacheValue(key, "1", OTP_ATTEMPT_KEY_EXPIRY)
 
 #### How to use Async programming using Machinery
 - A separate container will start that will kick off [machinery](https://github.com/RichardKnop/machinery)
+- The Dockerfile for worker container is worker.Dockerfile
 - Prod env works with AWS SQS, while dev works with local redis.
 - Create a consumer task as [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/tasks/send_otp.go)
 - Register the task [here](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/initializers/connect_async_queue.go#L65)
 - Trigger the async task like [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/services/otp/otp_service.go#L38)
 - Optionally use [Routing Key](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/services/otp/otp_service.go#L36) - Routing key is recommended in prod so that different tasks go to their respective Queues in the broker.
 - You need to first create these queues in your AWS account.
+
+#### How to create periodic tasks (Cron)
+- Cron server runs as a separate container.
+- We are using https://github.com/robfig/cron
+- The Dockerfile for cron container is worker.Dockerfile.
+- Create a cron function inside the `crons` package, like [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/crons/cron1.go)
+- Add the scheduler [here](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/crons/initialise_cron.go#L11)
