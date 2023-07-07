@@ -170,3 +170,13 @@ curl --location 'localhost:3000/api/v1/otp/validate/' \
     "otp": "7668"
 }'
 ```
+- [RefreshTokenController](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/controllers/auth_controller.go#L41) is used to refresh access tokens
+```
+curl --location 'localhost:3000/api/v1/token/refresh/' \
+--header 'Content-Type: application/json' \
+--data '{
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODg0MTM3NzksInR5cGUiOiJyZWZyZXNoIiwidXNlcl9pZCI6N30.BB1zVyl3H6st-6drvqHUeTSn5FBmsyAQ157mUmFuEoc"
+}'
+```
+- Use [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/services/auth/auth_service.go#L49) function to fetch user_id from token.
+- Use [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/main.go#L35) to add JWT middlerware in your API routes to make them secure and private.
