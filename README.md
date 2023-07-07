@@ -113,3 +113,23 @@ DROP INDEX idx_mobile_number;
 +-------------------------------------------+---------+
 ```
 This output comes from gorp-migrations table from the DB.
+
+#### How to use Redis Cache
+- Check for a file named [cache_adapter.go](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/helpers/cache_adapter.go)
+- Use this to interact with Redis.
+- Example:
+```
+GetCacheValue
+val, _ := helpers.GetCacheValue(cacheKey)
+if val == "" {
+	randomOTP = helpers.GenerateRandomOTP()
+	helpers.SetCacheValue(cacheKey, randomOTP, 120)
+} else {
+	randomOTP = val
+}
+
+SetCacheValue
+helpers.SetCacheValue(key, "1", OTP_ATTEMPT_KEY_EXPIRY)
+```
+
+
