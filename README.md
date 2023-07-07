@@ -41,3 +41,37 @@ docker exec -it go_boilerplate-db-1 psql -U postgres -> This will help you exec 
 create database boilerplate -> This will create the DB named `boilerplate`
 ```
 - Terminate and run `docker-compose up` again, this will run app, worker, cron, db, and redis containers.
+
+### How to use the repository?
+#### Adding a controller
+- Create a controller function in the `controllers` package, for example -
+```
+func SignInController(c *gin.Context) {
+	var requestBody validators.SignInStruct
+	var randomOTP string
+	c.Bind(&requestBody)
+	validationErr := requestBody.Validate()
+	if validationErr != nil {
+		c.JSON(validationErr.Status, validationErr)
+		return
+	}
+
+	user, _ := models.GetUserByMobile(*requestBody.MobileNumber)
+	cacheKey := otpservice.OTP_KEY_PREFIX + user.MobileNumber
+	val, _ := helpers.GetCacheValue(cacheKey)
+	if val == "" {
+		randomOTP = helpers.GenerateRandomOTP()
+		helpers.SetCacheValue(cacheKey, randomOTP, 120)
+	} else {
+		randomOTP = val
+	}
+
+	otpservice.SendOTP(user.MobileNumber, randomOTP, int(user.ID))
+
+	c.JSON(http.StatusOK, gin.H{
+		"result": "OTP Sent successfully",
+	})
+}
+```
+- Create validation in the validators package, here you will validate the request body and params. e.g. - [validator](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/validators/auth_validator.go)
+- 
