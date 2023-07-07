@@ -112,7 +112,7 @@ DROP INDEX idx_mobile_number;
 | 20230705141125-create_index_mobile_no.sql | no      |
 +-------------------------------------------+---------+
 ```
-This output comes from gorp-migrations table from the DB.
+This output comes from the gorp-migrations table from the DB.
 
 #### How to use Redis Cache
 - Check for a file named [cache_adapter.go](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/helpers/cache_adapter.go)
@@ -149,10 +149,10 @@ helpers.SetCacheValue(key, "1", OTP_ATTEMPT_KEY_EXPIRY)
 - Create a cron function inside the `crons` package, like [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/crons/cron1.go)
 - Add the scheduler [here](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/crons/initialise_cron.go#L11)
 
-#### env variables
+#### ENV variables
 All the env variables goes in .env file and are being used as `os.Getenv("<ENV_NAME>")`
 
-#### Authentication Module (using JWT)
+#### Auth Module (using JWT)
 - [SignInController](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/controllers/auth_controller.go#L14) is used to send OTP for a user whose mobile number resides in the DB (users table).
 ```
 curl --location 'localhost:3000/api/v1/user/signin/' \
