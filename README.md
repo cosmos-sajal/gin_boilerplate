@@ -148,3 +148,25 @@ helpers.SetCacheValue(key, "1", OTP_ATTEMPT_KEY_EXPIRY)
 - The Dockerfile for cron container is worker.Dockerfile.
 - Create a cron function inside the `crons` package, like [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/crons/cron1.go)
 - Add the scheduler [here](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/crons/initialise_cron.go#L11)
+
+#### env variables
+All the env variables goes in .env file and are being used as `os.Getenv("<ENV_NAME>")`
+
+#### Authentication Module (using JWT)
+- [SignInController](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/controllers/auth_controller.go#L14) is used to send OTP for a user whose mobile number resides in the DB (users table).
+```
+curl --location 'localhost:3000/api/v1/user/signin/' \
+--header 'Content-Type: application/json' \
+--data '{
+    "mobile_number": "+919999887766"
+}'
+```
+- [OTPValidateController](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/controllers/otp_controller.go#L13) is used to validate the OTP sent to the user
+```
+curl --location 'localhost:3000/api/v1/otp/validate/' \
+--header 'Content-Type: application/json' \
+--data '{
+    "mobile_number": "+919999887766",
+    "otp": "7668"
+}'
+```
