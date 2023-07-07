@@ -74,4 +74,42 @@ func SignInController(c *gin.Context) {
 }
 ```
 - Create validation in the validators package, here you will validate the request body and params. e.g. - [validator](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/validators/auth_validator.go)
-- 
+
+#### Models & Migrations
+- Check [Gorm Documenation](https://gorm.io/docs/) & [sql-migrate](https://github.com/rubenv/sql-migrate).
+- Add the models like [this](https://github.com/cosmos-sajal/gin_boilerplate/blob/main/models/user.go)
+- You can either run [Automigrate](https://gorm.io/docs/migration.html) functionality provided by gorm to migrate the DB or use sql-migrate to update.
+##### How to automigrate
+Run the following from the root folder after creating the model
+```
+go run migrate/migrate.go
+```
+##### How to run migration by creating SQL migrations using sql-migrate
+- Read the documentation provided by [sql-migrate](https://github.com/rubenv/sql-migrate)
+- Run the following command to create an empty migration with up/down
+```
+docker-compose run --rm app sh -c 'sql-migrate new -config=dbconfig.yml -env="development" <migration_name>'
+
+<migration_name> can be anything, it is just for readability, this will be used to name the SQL file.
+```
+- The SQL file is created under the directory `migrations` (this is specified in dbconfig.yml under dir key)
+- The file will be empty, you need to write the SQL commands for migration, example -
+```
+-- +migrate Up
+CREATE INDEX idx_mobile_number ON public.users USING btree (mobile_number);
+
+-- +migrate Down
+DROP INDEX idx_mobile_number;
+```
+- Run `docker-compose run --rm app sh -c 'sql-migrate up -config=dbconfig.yml -env="development" create_index_mobile_no'` to run the up migration.
+- Run `docker-compose run --rm app sh -c 'sql-migrate down -config=dbconfig.yml -env="development"'` for down migration.
+- You can also check the status of the current migration using this command - `docker-compose run --rm app sh -c 'sql-migrate status -config=dbconfig.yml -env="development"'`, this will return something like this -
+```
++-------------------------------------------+---------+
+|                 MIGRATION                 | APPLIED |
++-------------------------------------------+---------+
+| 20230705135358-init.sql                   | no      |
+| 20230705141125-create_index_mobile_no.sql | no      |
++-------------------------------------------+---------+
+```
+This output comes from gorp-migrations table from the DB.
